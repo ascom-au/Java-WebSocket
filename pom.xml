@@ -5,7 +5,7 @@
     <groupId>org.java-websocket</groupId>
     <artifactId>Java-WebSocket</artifactId>
     <packaging>jar</packaging>
-    <version>1.5.4-SNAPSHOT</version>
+    <version>1.5.4.Ascom-SNAPSHOT</version>
     <name>Java-WebSocket</name>
     <description>A barebones WebSocket client and server implementation written 100% in Java</description>
     <url>https://github.com/TooTallNate/Java-WebSocket</url>
@@ -18,7 +18,7 @@
         <org.json.version>20180813</org.json.version>
 
         <!-- Maven plugin versions -->
-        <bnd.maven.plugin.version>4.3.1</bnd.maven.plugin.version>
+        <bnd.maven.plugin.version>6.3.1</bnd.maven.plugin.version>
         <maven.checkstyle.plugin.version>3.1.1</maven.checkstyle.plugin.version>
         <maven.compiler.plugin.version>3.7.0</maven.compiler.plugin.version>
         <maven.gpg.plugin.version>1.6</maven.gpg.plugin.version>

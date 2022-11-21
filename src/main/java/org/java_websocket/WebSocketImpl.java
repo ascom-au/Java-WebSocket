@@ -33,6 +33,7 @@ import java.nio.channels.SelectionKey;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -301,6 +302,10 @@ public class WebSocketImpl implements WebSocket {
                     closeConnectionDueToInternalServerError(e);
                     return false;
                   }
+                  if (response.getHttpStatus() >= 400) {
+                    closeConnectionDueToCustomFailure(response);
+                    return false;
+                  }
                   write(d.createHandshake(
                       d.postProcessHandshakeResponseAsServer(handshake, response)));
                   draft = d;
@@ -440,6 +445,43 @@ public class WebSocketImpl implements WebSocket {
   private void closeConnectionDueToInternalServerError(RuntimeException exception) {
     write(generateHttpResponseDueToError(500));
     flushAndClose(CloseFrame.NEVER_CONNECTED, exception.getMessage(), false);
+  }
+  
+  /**
+   * Close the connection with a custom failure code and message.
+   * 
+   * @param response The pre-filled response.
+   */
+  private void closeConnectionDueToCustomFailure(ServerHandshakeBuilder response) {
+    write(generateCustomFailedHttpResponse(response));
+    flushAndClose(CloseFrame.NEVER_CONNECTED, response.getHttpStatusMessage(), false);
+  }
+  
+  /**
+   * Create the response data for a custom failure message.
+   * 
+   * @param response The pre-filled response
+   * @return The raw data to be sent
+   */
+  private ByteBuffer generateCustomFailedHttpResponse(ServerHandshakeBuilder response) {
+    String responseContent = String.format(
+            "<html><head></head><body><h1>%d %s</h1></body></html>", 
+            response.getHttpStatus(),
+            response.getHttpStatusMessage());
+      
+    StringBuilder responseBuilder = new StringBuilder();
+    responseBuilder.append("HTTP/1.1 ").append(response.getHttpStatus()).append("\r\n");
+    responseBuilder.append("Content-Type: text/html\r\n");
+    responseBuilder.append("Server: TooTallNate Java-WebSocket\r\n");
+    responseBuilder.append("Content-Length: ").append(responseContent.length()).append("\r\n");
+    for (Iterator<String> iter = response.iterateHttpFields(); iter.hasNext(); ) {
+      String header = iter.next();
+      responseBuilder.append(header).append(": ").append(response.getFieldValue(header)).append("\r\n");
+    }
+    responseBuilder.append("\r\n");
+    responseBuilder.append(responseContent);
+    return ByteBuffer.wrap(
+            Charsetfunctions.asciiBytes(responseBuilder.toString()));
   }
 
   /**

@@ -1,14 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    
+    <parent>
+        <groupId>au.com.iwsoftware</groupId>
+        <artifactId>iwsoftware</artifactId>
+        <version>3.0</version>
+    </parent>
+    
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.java-websocket</groupId>
     <artifactId>Java-WebSocket</artifactId>
     <packaging>jar</packaging>
-    <version>1.5.4.Ascom</version>
-    <name>Java-WebSocket</name>
+    <version>1.5.4.Ascom.1-SNAPSHOT</version>
+    <name>${project.artifactId}-${project.version}</name>
     <description>A barebones WebSocket client and server implementation written 100% in Java</description>
     <url>https://github.com/TooTallNate/Java-WebSocket</url>
+    
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <slf4j.version>2.0.6</slf4j.version>
@@ -30,8 +38,7 @@
         <sonar.projectKey>org.java-websocket:Java-WebSocket</sonar.projectKey>
         <sonar.organization>marci4-github</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
-        <maven.compiler.source>11</maven.compiler.source>
-        <maven.compiler.target>11</maven.compiler.target>
+        <jdk.version>11</jdk.version>
     </properties>
     <licenses>
         <license>

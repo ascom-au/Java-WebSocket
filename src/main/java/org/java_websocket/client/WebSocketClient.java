@@ -45,7 +45,6 @@ import java.util.TreeMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import javax.net.SocketFactory;
-import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLException;
 import javax.net.ssl.SSLParameters;
 import javax.net.ssl.SSLSession;
@@ -343,10 +342,12 @@ public abstract class WebSocketClient extends AbstractWebSocket implements Runna
       closeBlocking();
       if (writeThread != null) {
         this.writeThread.interrupt();
+        this.writeThread.join();
         this.writeThread = null;
       }
       if (connectReadThread != null) {
         this.connectReadThread.interrupt();
+        this.connectReadThread.join();
         this.connectReadThread = null;
       }
       this.draft.reset();
@@ -372,6 +373,7 @@ public abstract class WebSocketClient extends AbstractWebSocket implements Runna
       throw new IllegalStateException("WebSocketClient objects are not reuseable");
     }
     connectReadThread = new Thread(this);
+    connectReadThread.setDaemon(isDaemon());
     connectReadThread.setName("WebSocketConnectReadThread-" + connectReadThread.getId());
     connectReadThread.start();
   }
@@ -505,7 +507,16 @@ public abstract class WebSocketClient extends AbstractWebSocket implements Runna
       throw e;
     }
 
+    if (writeThread != null) {
+      writeThread.interrupt();
+      try {
+        writeThread.join();
+      } catch (InterruptedException e) {
+        /* ignore */
+      }
+    }
     writeThread = new Thread(new WebsocketWriteThread(this));
+    writeThread.setDaemon(isDaemon());
     writeThread.start();
 
     byte[] rawbuffer = new byte[WebSocketImpl.RCVBUF];
@@ -523,7 +534,6 @@ public abstract class WebSocketClient extends AbstractWebSocket implements Runna
       onError(e);
       engine.closeConnection(CloseFrame.ABNORMAL_CLOSE, e.getMessage());
     }
-    connectReadThread = null;
   }
 
   private void upgradeSocketToSSL()
@@ -534,9 +544,7 @@ public abstract class WebSocketClient extends AbstractWebSocket implements Runna
     if (socketFactory instanceof SSLSocketFactory) {
       factory = (SSLSocketFactory) socketFactory;
     } else {
-      SSLContext sslContext = SSLContext.getInstance("TLSv1.2");
-      sslContext.init(null, null, null);
-      factory = sslContext.getSocketFactory();
+      factory = (SSLSocketFactory) SSLSocketFactory.getDefault();
     }
     socket = factory.createSocket(socket, uri.getHost(), getPort(), true);
   }
@@ -801,7 +809,6 @@ public abstract class WebSocketClient extends AbstractWebSocket implements Runna
         handleIOException(e);
       } finally {
         closeSocket();
-        writeThread = null;
       }
     }
 

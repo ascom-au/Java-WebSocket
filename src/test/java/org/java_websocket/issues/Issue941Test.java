@@ -25,8 +25,6 @@
 
 package org.java_websocket.issues;
 
-import static org.junit.Assert.assertArrayEquals;
-
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.nio.ByteBuffer;
@@ -39,6 +37,7 @@ import org.java_websocket.handshake.ClientHandshake;
 import org.java_websocket.handshake.ServerHandshake;
 import org.java_websocket.server.WebSocketServer;
 import org.java_websocket.util.SocketUtil;
+import static org.junit.Assert.assertArrayEquals;
 import org.junit.Test;
 
 public class Issue941Test {
@@ -47,7 +46,7 @@ public class Issue941Test {
   private CountDownLatch pongLatch = new CountDownLatch(1);
   private byte[] pingBuffer, receivedPingBuffer, pongBuffer;
 
-  @Test
+  @Test(timeout = 10000)
   public void testIssue() throws Exception {
     int port = SocketUtil.getAvailablePort();
     WebSocketClient client = new WebSocketClient(new URI("ws://localhost:" + port)) {
